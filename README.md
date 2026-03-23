@@ -23,6 +23,44 @@ The goal is not maximum performance at all costs, but to observe how each optimi
 
 ---
 
+## Requirements
+
+This project is designed to run on NVIDIA GPUs with CUDA support.
+
+### System requirements
+
+* Python **3.12**
+* NVIDIA GPU
+* CUDA (compatible with your PyTorch / ONNX Runtime / TensorRT versions)
+
+### Notes
+
+* GPU acceleration is required for meaningful benchmarking results.
+* ONNX Runtime and TensorRT will fall back to CPU if CUDA is not available, which will significantly impact performance.
+* The scripts have been tested on:
+
+  * Desktop GPUs (e.g. RTX 2080 Ti)
+  * Laptop GPUs (e.g. RTX 3050 Ti)
+  * Jetson devices (planned)
+
+### Verify your setup
+
+You can quickly check that CUDA is available:
+
+```bash id="z8a3nl"
+python -c "import torch; print(torch.cuda.is_available())"
+```
+
+This should return:
+
+```id="v1m7ru"
+True
+```
+
+If it returns `False`, your CUDA setup is not correctly configured.
+
+---
+
 ## Setup
 
 ```bash
@@ -133,22 +171,53 @@ Each configuration is evaluated using:
 
 ## Results
 
-This section can be extended with results from different devices.
+###  RTX 3050 Ti (Laptop)
 
-Example:
+| Batch | Backend  | Precision  | Latency (ms) | FPS        | VRAM (MB) |
+| ----- | -------- | ---------- | ------------ | ---------- | --------- |
+| 1     | PyTorch  | FP32       | 6.66         | 150.05     | 42.10     |
+| 1     | PyTorch  | FP16       | 6.00         | 166.68     | 46.94     |
+| 1     | ONNX     | FP32       | 7.23         | 138.26     | 46.94     |
+| 1     | ONNX     | FP16       | 6.20         | 161.25     | 46.94     |
+| 1     | TensorRT | FP32       | 4.88         | 204.71     | 51.39     |
+| 1     | TensorRT | FP16       | **2.84**     | **352.70** | 51.39     |
+| 4     | PyTorch  | FP32       | 22.27        | 44.90      | 42.10     |
+| 4     | PyTorch  | FP16       | 15.35        | 65.15      | 46.94     |
+| 4     | ONNX     | FP32       | 28.05        | 35.65      | 46.94     |
+| 4     | ONNX     | FP16       | 20.78        | 48.12      | 46.94     |
+| 4     | TensorRT | FP32       | 16.70        | 59.87      | 76.47     |
+| 4     | TensorRT | FP16       | **9.66**     | **103.55** | 76.47     |
+| 8     | PyTorch  | FP32       | 44.61        | 22.42      | 56.24     |
+| 8     | PyTorch  | FP16       | 29.37        | 34.05      | 61.08     |
+| 8     | ONNX     | FP32       | 57.00        | 17.55      | 61.08     |
+| 8     | ONNX     | FP16       | 43.04        | 23.23      | 61.08     |
+| 8     | TensorRT | FP32       | 32.73        | 30.56      | 120.51    |
+| 8     | TensorRT | FP16       | **18.41**    | **54.32**  | 120.51    |
 
-| GPU         | Backend  | Precision | Batch | Latency (ms) | FPS |
-| ----------- | -------- | --------- | ----- | ------------ | --- |
-| RTX 3050 Ti | TensorRT | FP16      | 1     | 2.84         | 352 |
-| RTX 2080 Ti | TensorRT | FP16      | 1     | ...          | ... |
 
----
+###  RTX 2080 Ti (Desktop)
 
-## Tested hardware
+| Batch | Backend  | Precision  | Latency (ms) | FPS        | VRAM (MB) |
+| ----- | -------- | ---------- | ------------ | ---------- | --------- |
+| 1     | PyTorch  | FP32       | 6.08         | 164.58     | 42.10     |
+| 1     | PyTorch  | FP16       | 6.65         | 150.34     | 46.94     |
+| 1     | ONNX     | FP32       | 5.41         | 184.92     | 46.94     |
+| 1     | ONNX     | FP16       | 4.85         | 206.30     | 46.94     |
+| 1     | TensorRT | FP32       | 3.34         | 299.44     | 51.39     |
+| 1     | TensorRT | FP16       | **2.54**     | **392.94** | 51.39     |
+| 4     | PyTorch  | FP32       | 11.24        | 88.93      | 42.10     |
+| 4     | PyTorch  | FP16       | 10.66        | 93.78      | 46.94     |
+| 4     | ONNX     | FP32       | 17.10        | 58.46      | 46.94     |
+| 4     | ONNX     | FP16       | 15.00        | 66.68      | 46.94     |
+| 4     | TensorRT | FP32       | 9.59         | 104.26     | 76.47     |
+| 4     | TensorRT | FP16       | **7.07**     | **141.42** | 76.47     |
+| 8     | PyTorch  | FP32       | 20.97        | 47.68      | 56.24     |
+| 8     | PyTorch  | FP16       | 16.11        | 62.07      | 61.08     |
+| 8     | ONNX     | FP32       | 34.62        | 28.88      | 61.08     |
+| 8     | ONNX     | FP16       | 29.91        | 33.43      | 61.08     |
+| 8     | TensorRT | FP32       | 17.91        | 55.82      | 120.51    |
+| 8     | TensorRT | FP16       | **12.87**    | **77.69**  | 120.51    |
 
-* NVIDIA RTX 2080 Ti
-* NVIDIA RTX 3050 Ti (laptop)
-* Jetson Orin (planned)
 
 ---
 
