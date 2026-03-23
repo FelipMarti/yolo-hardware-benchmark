@@ -14,23 +14,45 @@ BATCH_SIZES = [1, 4, 8]
 
 def export_onnx(model_path, imgsz, batch):
     model = YOLO(model_path)
-
     base = os.path.basename(model_path).replace(".pt", "")
-    out_path = f"models/{base}_b{batch}.onnx"
+    
+    # FP32 export
+    out_path_fp32 = f"models/{base}_b{batch}_fp32.onnx"
 
     model.export(
         format="onnx",
         imgsz=imgsz,
         opset=12,
         batch=batch,
-        dynamic=False
+        dynamic=False,
+        half=False
     )
 
     default_path = model_path.replace(".pt", ".onnx")
     if os.path.exists(default_path):
-        os.rename(default_path, out_path)
+        os.rename(default_path, out_path_fp32)
 
-    print(f"Exported ONNX (batch={batch}) -> {out_path}")
+    print(f"Exported ONNX FP32 (batch={batch}) -> {out_path_fp32}")
+
+
+    # FP16 export
+    out_path_fp16 = f"models/{base}_b{batch}_fp16.onnx"
+    
+    model.export(
+        format="onnx",
+        imgsz=imgsz,
+        opset=12,
+        batch=batch,
+        dynamic=False,
+        half=True  
+    )
+    
+    # rename default output if needed
+    default_path = model_path.replace(".pt", ".onnx")
+    if os.path.exists(default_path):
+        os.rename(default_path, out_path_fp16)
+    
+    print(f"Exported ONNX FP16 (batch={batch}) -> {out_path_fp16}")
 
 
 def export_engine(model_path, imgsz, batch):
@@ -38,9 +60,7 @@ def export_engine(model_path, imgsz, batch):
 
     base = os.path.basename(model_path).replace(".pt", "")
 
-    # -------------------------
     # FP32 export
-    # -------------------------
     out_path_fp32 = f"models/{base}_b{batch}_fp32.engine"
 
     model.export(
@@ -57,9 +77,7 @@ def export_engine(model_path, imgsz, batch):
 
     print(f"Exported TRT FP32 (batch={batch}) -> {out_path_fp32}")
 
-    # -------------------------
     # FP16 export
-    # -------------------------
     out_path_fp16 = f"models/{base}_b{batch}_fp16.engine"
 
     model.export(
@@ -84,10 +102,8 @@ def main():
 
     os.makedirs("models", exist_ok=True)
 
-    # Ensure model exists locally
-    model = YOLO(args.model)
     pt_path = f"models/{args.model}"
-    model.save(pt_path)
+    model = YOLO(pt_path)
 
     for batch in BATCH_SIZES:
         print(f"\nExporting batch={batch}")

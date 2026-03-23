@@ -162,25 +162,44 @@ def main():
             print(f"PT FP16: {lat:.2f} ms | {1000/lat:.2f} FPS")
 
         # -----------------
-        # ONNX
+        # ONNX FP32
         # -----------------
-        onnx_path = f"models/{base}_b{batch}.onnx"
-        if os.path.exists(onnx_path):
+        onnx_fp32_path = f"models/{base}_b{batch}_fp32.onnx"
+        if os.path.exists(onnx_fp32_path):
             session = ort.InferenceSession(
-                onnx_path,
+                onnx_fp32_path,
                 providers=["CUDAExecutionProvider", "CPUExecutionProvider"],
             )
 
             providers = session.get_providers()
             device = "GPU" if "CUDAExecutionProvider" in providers else "CPU"
 
-            print(f"ONNX ({device})")
-
             lat = benchmark_onnx(session, imgs)
             vram = get_vram()
             results.append((gpu_name,"onnx", f"fp32_{device.lower()}", batch, lat, 1000 / lat, vram))
 
             print(f"ONNX FP32 ({device}): {lat:.2f} ms | {1000/lat:.2f} FPS")
+        else:
+            print(f"ONNX model not found for batch={batch}")
+
+        # -----------------
+        # ONNX FP16
+        # -----------------
+        onnx_fp16_path = f"models/{base}_b{batch}_fp16.onnx"
+        if os.path.exists(onnx_fp16_path):
+            session = ort.InferenceSession(
+                onnx_fp16_path,
+                providers=["CUDAExecutionProvider", "CPUExecutionProvider"],
+            )
+
+            providers = session.get_providers()
+            device = "GPU" if "CUDAExecutionProvider" in providers else "CPU"
+
+            lat = benchmark_onnx(session, imgs)
+            vram = get_vram()
+            results.append((gpu_name,"onnx", f"fp16_{device.lower()}", batch, lat, 1000 / lat, vram))
+
+            print(f"ONNX FP16 ({device}): {lat:.2f} ms | {1000/lat:.2f} FPS")
         else:
             print(f"ONNX model not found for batch={batch}")
 

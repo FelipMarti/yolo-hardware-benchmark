@@ -39,3 +39,4 @@ typing_extensions==4.15.0
 ultralytics==8.4.24
 ultralytics-thop==2.0.18
 urllib3==2.6.3
+tensorrt-cu12>=7.0.0,!=10.1.0
