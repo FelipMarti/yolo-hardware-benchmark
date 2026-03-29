@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 
 # -----------------------------
@@ -22,7 +23,13 @@ def load_data(path):
 
     df["latency_per_image"] = df["latency_ms"] / df["batch"]
 
-    return df
+    df["throughput_fps"] = df["fps"]  # (images/sec)
+
+    gpu_name_raw = df["gpu_name"].iloc[0]
+    gpu_name = gpu_name_raw.replace("_", " ")
+    gpu_name_file = gpu_name_raw  
+
+    return df, gpu_name, gpu_name_file
 
 
 # -----------------------------
@@ -34,14 +41,14 @@ def setup_style():
 
 
 # -----------------------------
-# Plot 1: Grouped Bar (BEST)
+# Plot 1: Grouped Bar
 # -----------------------------
-def plot_grouped_bar(df, outdir):
+def plot_grouped_bar(df, gpu_name, gpu_name_file, outdir):
     g = sns.catplot(
         data=df,
         kind="bar",
         x="batch",
-        y="fps",
+        y="throughput_fps",
         hue="backend",
         col="precision",
         height=5,
@@ -49,17 +56,20 @@ def plot_grouped_bar(df, outdir):
     )
 
     g.set_titles("{col_name}")
-    g.set_axis_labels("Batch Size", "FPS")
-    g.fig.suptitle("Throughput (FPS) by Backend, Batch, and Precision", y=1.05)
+    g.set_axis_labels("Batch Size", "Throughput (images/sec)")
+    g.fig.suptitle(
+        f"Throughput (FPS) by Backend, Batch, and Precision\n{gpu_name}",
+        y=1.05
+    )
 
-    plt.savefig(os.path.join(outdir, "grouped_fps.png"))
+    plt.savefig(os.path.join(outdir, f"{gpu_name_file}_grouped_fps.png"))
     plt.close()
 
 
 # -----------------------------
 # Plot 2: Latency per Image
 # -----------------------------
-def plot_latency_per_image(df, outdir):
+def plot_latency_per_image(df, gpu_name, gpu_name_file, outdir):
     g = sns.relplot(
         data=df,
         kind="line",
@@ -73,16 +83,19 @@ def plot_latency_per_image(df, outdir):
     )
 
     g.set_axis_labels("Batch Size", "Latency per Image (ms)")
-    g.fig.suptitle("Efficiency: Latency per Image", y=1.05)
+    g.fig.suptitle(
+        f"Latency per Image (Efficiency)\n{gpu_name}",
+        y=1.05
+    )
 
-    plt.savefig(os.path.join(outdir, "latency_per_image.png"))
+    plt.savefig(os.path.join(outdir, f"{gpu_name_file}_latency_per_image.png"))
     plt.close()
 
 
 # -----------------------------
 # Plot 3: VRAM scaling
 # -----------------------------
-def plot_vram(df, outdir):
+def plot_vram(df, gpu_name, gpu_name_file, outdir):
     g = sns.relplot(
         data=df,
         kind="line",
@@ -96,34 +109,37 @@ def plot_vram(df, outdir):
     )
 
     g.set_axis_labels("Batch Size", "VRAM (MB)")
-    g.fig.suptitle("Memory Usage Scaling", y=1.05)
+    g.fig.suptitle(
+        f"Memory Usage Scaling\n{gpu_name}",
+        y=1.05
+    )
 
-    plt.savefig(os.path.join(outdir, "vram_scaling.png"))
+    plt.savefig(os.path.join(outdir, f"{gpu_name_file}_vram_scaling.png"))
     plt.close()
 
 
 # -----------------------------
 # Plot 4: Throughput vs Latency
 # -----------------------------
-def plot_tradeoff(df, outdir):
+def plot_tradeoff(df, gpu_name, gpu_name_file, outdir):
     plt.figure()
 
     sns.scatterplot(
         data=df,
         x="latency_ms",
-        y="fps",
+        y="throughput_fps",
         hue="backend",
         style="precision",
         size="batch",
         sizes=(50, 200)
     )
 
-    plt.title("Throughput vs Latency Tradeoff")
+    plt.title(f"Throughput vs Latency Trade-off\n{gpu_name}")
     plt.xlabel("Latency (ms)")
-    plt.ylabel("FPS")
+    plt.ylabel("Throughput (images/sec)")
     plt.grid()
 
-    plt.savefig(os.path.join(outdir, "tradeoff.png"))
+    plt.savefig(os.path.join(outdir, f"{gpu_name_file}_tradeoff.png"))
     plt.close()
 
 
@@ -133,18 +149,26 @@ def plot_tradeoff(df, outdir):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--csv", required=True)
-    parser.add_argument("--outdir", default="results/plots")
+    parser.add_argument("--outdir", default=None)
     args = parser.parse_args()
 
-    os.makedirs(args.outdir, exist_ok=True)
+    repo_root = Path(__file__).resolve().parents[1]
+
+    if args.outdir is None:
+        outdir = repo_root / "results" / "plots"
+    else:
+        outdir = Path(args.outdir)
+
+    outdir.mkdir(parents=True, exist_ok=True)
 
     setup_style()
-    df = load_data(args.csv)
+    df, gpu_name, gpu_name_file = load_data(args.csv)
 
-    plot_grouped_bar(df, args.outdir)
-    plot_latency_per_image(df, args.outdir)
-    plot_vram(df, args.outdir)
-    plot_tradeoff(df, args.outdir)
+
+    plot_grouped_bar(df, gpu_name, gpu_name_file, outdir)
+    plot_latency_per_image(df, gpu_name, gpu_name_file, outdir)
+    plot_vram(df, gpu_name, gpu_name_file, outdir)
+    plot_tradeoff(df, gpu_name, gpu_name_file, outdir)
 
     print(f"Plots saved to {args.outdir}")
 

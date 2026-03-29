@@ -144,7 +144,7 @@ def main():
             model = YOLO(pt_path, task="detect")
             lat = benchmark_pt(model, imgs, half=False)
             vram = get_vram()
-            results.append((gpu_name, "pt", "fp32", batch, lat, 1000 / lat, vram))
+            results.append((gpu_name, "pt", "fp32", batch, lat, (batch * 1000) / lat, vram))
 
             print(f"PT FP32: {lat:.2f} ms | {1000/lat:.2f} FPS")
         else:
@@ -157,7 +157,7 @@ def main():
             model = YOLO(pt_path, task="detect")
             lat = benchmark_pt(model, imgs, half=True)
             vram = get_vram()
-            results.append((gpu_name, "pt", "fp16", batch, lat, 1000 / lat, vram))
+            results.append((gpu_name, "pt", "fp16", batch, lat, (batch * 1000) / lat, vram))
 
             print(f"PT FP16: {lat:.2f} ms | {1000/lat:.2f} FPS")
 
@@ -176,7 +176,7 @@ def main():
 
             lat = benchmark_onnx(session, imgs)
             vram = get_vram()
-            results.append((gpu_name,"onnx", f"fp32_{device.lower()}", batch, lat, 1000 / lat, vram))
+            results.append((gpu_name,"onnx", f"fp32_{device.lower()}", batch, lat, (batch * 1000) / lat, vram))
 
             print(f"ONNX FP32 ({device}): {lat:.2f} ms | {1000/lat:.2f} FPS")
         else:
@@ -197,7 +197,7 @@ def main():
 
             lat = benchmark_onnx(session, imgs)
             vram = get_vram()
-            results.append((gpu_name,"onnx", f"fp16_{device.lower()}", batch, lat, 1000 / lat, vram))
+            results.append((gpu_name,"onnx", f"fp16_{device.lower()}", batch, lat, (batch * 1000) / lat, vram))
 
             print(f"ONNX FP16 ({device}): {lat:.2f} ms | {1000/lat:.2f} FPS")
         else:
@@ -211,7 +211,7 @@ def main():
             model = YOLO(trt_fp32_path, task="detect")
             lat = benchmark_pt(model, imgs, half=False)
             vram = get_vram()
-            results.append((gpu_name, "engine", "fp32", batch, lat, 1000 / lat, vram))
+            results.append((gpu_name, "engine", "fp32", batch, lat, (batch * 1000) / lat, vram))
 
             print(f"TRT FP32: {lat:.2f} ms | {1000/lat:.2f} FPS")
         else:
@@ -225,7 +225,7 @@ def main():
             model = YOLO(trt_fp16_path, task="detect")
             lat = benchmark_pt(model, imgs, half=True)
             vram = get_vram()
-            results.append((gpu_name, "engine", "fp16", batch, lat, 1000 / lat, vram))
+            results.append((gpu_name, "engine", "fp16", batch, lat, (batch * 1000) / lat, vram))
 
             print(f"TRT FP16: {lat:.2f} ms | {1000/lat:.2f} FPS")
         else:
