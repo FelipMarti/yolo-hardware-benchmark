@@ -1,0 +1,146 @@
+i# ----------------------
+
+# Python
+
+# ----------------------
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# C extensions
+
+*.so
+
+# Distribution / packaging
+
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# pip
+
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+pytest_cache/
+
+# Jupyter
+
+.ipynb_checkpoints
+
+# ----------------------
+
+# Virtual environments
+
+# ----------------------
+
+.venv/
+venv/
+env/
+ENV/
+
+# ----------------------
+
+# Environment variables
+
+# ----------------------
+
+.env
+.env.*
+
+# ----------------------
+
+# Model weights (YOLO)
+
+# ----------------------
+
+models/
+weights/
+*.pt
+*.onnx
+*.engine
+*.trt
+
+# ----------------------
+
+# Datasets / images
+
+# ----------------------
+
+data/
+datasets/
+images/
+runs/
+outputs/
+predictions/
+
+# ----------------------
+
+# Logs
+
+# ----------------------
+
+logs/
+*.log
+
+# ----------------------
+
+# Docker
+
+# ----------------------
+
+docker-compose.override.yml
+*.pid
+*.cid
+
+# ----------------------
+
+# OS files
+
+# ----------------------
+
+.DS_Store
+Thumbs.db
+
+# ----------------------
+
+# IDE
+
+# ----------------------
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ----------------------
+
+# Build artifacts
+
+# ----------------------
+
+*.tar
+*.tar.gz
+*.zip
+
+
